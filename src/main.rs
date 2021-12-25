@@ -1,7 +1,7 @@
 use std::num::NonZeroU32;
 
 use permutation::Permutations;
-use smallvec::SmallVec;
+use table::KeyTable;
 
 fn main() {
     let all_words = include_str!("../words_alpha");
@@ -9,11 +9,12 @@ fn main() {
 }
 
 mod permutation;
+mod table;
 
 #[derive(Debug, Default)]
 struct WordFinder<'a> {
     string: &'a str,
-    short_map: ahash::AHashMap<NonZeroU32, SmallVec<[u32; 4]>>,
+    table: KeyTable<u32>,
     word_starts: Vec<u32>,
     word_lens: Vec<u8>,
 }
@@ -22,7 +23,7 @@ impl<'a> WordFinder<'a> {
         let len = src.split('\n').count();
         let mut me = WordFinder {
             string: src,
-            short_map: ahash::AHashMap::with_capacity(len),
+            table: KeyTable::new(len),
             word_starts: Vec::with_capacity(len),
             word_lens: Vec::with_capacity(len)
         };
@@ -46,17 +47,10 @@ impl<'a> WordFinder<'a> {
         }
     }
     fn insert_strict(&mut self, loc: NonZeroU32, word_start: u32, word_len: u8) {
-        let insertion = self.word_starts.len() as u32;
+        let word_start_idx = self.word_starts.len() as u32;
         self.word_starts.push(word_start);
         self.word_lens.push(word_len);
-        match self.short_map.get_mut(&loc) {
-            Some(words) => {
-                words.push(insertion);
-            },
-            None => {
-                self.short_map.insert(loc,  smallvec::smallvec![insertion]);
-            }
-        }
+        self.table.insert(loc, word_start_idx);
     }
     fn get_word(&self, word_start: u32, word_len: u8) -> &'a str {
         let s = word_start as usize;
