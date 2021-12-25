@@ -14,6 +14,7 @@ impl Permutations {
             })
             .collect();
         filters.sort_unstable();
+        filters.dedup();
         Permutations {
             counter: 0,
             filters
@@ -39,7 +40,7 @@ impl Iterator for Permutations {
         NonZeroU32::new(combined)
     }
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let remaining = (2u32.pow(self.filters.len() as u32) - self.counter) as usize - 1;
+        let remaining = ((1 << (self.filters.len() as u32)) - self.counter) as usize - 1;
         (remaining, Some(remaining))
     }
 }
