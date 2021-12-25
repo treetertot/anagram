@@ -2,7 +2,7 @@ use arrayvec::ArrayString;
 use smallvec::SmallVec;
 
 fn main() {
-    let all_words = include_str!("../words_alpha.txt");
+    let all_words = include_str!("../words_alpha");
     let finder = WordFinder::from_str(all_words);
 }
 
